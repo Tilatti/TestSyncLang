@@ -121,16 +121,20 @@ jkFlipFlop i j k c = atom (nodeName "JKFlipFlop" i) $ do
 	return $ value q
 
 fall :: Integer -> E Bool -> Atom (E Bool)
-fall i s = atom (nodeName "isFall" i) $ do
+fall i s = atom (nodeName "is_falling" i) $ do
+		q <- bool "q" False
 		last <- bool "last" True
+		q <== (value last) &&. (not_ s)
 		last <== s
-		return $ (value last) &&. (not_ s)
+		return $ (value q)
 
 rise :: Integer -> E Bool -> Atom (E Bool)
-rise i s = atom (nodeName "isRise" i) $ do
+rise i s = atom (nodeName "is_rising" i) $ do
+		q <- bool "q" False
 		last <- bool "last" False
+		q <== (not_ (value last)) &&. s
 		last <== s
-		return $ not_ (value last) &&. s
+		return $ (value q)
 
 --toggleFlipFlop :: Integer -> Atom (V Bool)
 --toggleFlipFlop i = atom (nodeName "toggle" i) $ do
@@ -140,28 +144,24 @@ rise i s = atom (nodeName "isRise" i) $ do
 
 latchTest :: Atom ()
 latchTest = atom "latchTest" $ do
-	t <- bool "trig" True
 	period 1000 $ exactPhase 0 $ atom "test" $ do
-		-- b_out <- oscillator 1 False 4 0
 		b_out <- jkFlipFlop 0 (Const True) (Const True) (Const True)
 
-		is_rise <- rise 0 b_out
+		is_rising <- rise 0 b_out
 
 		atom "b_rise" $ do
-			cond $ is_rise
+			cond $ is_rising
 			printStrLn "RISE !"
-
-		atom "chec_b_true" $ do
+		atom "check_b_true" $ do
 			cond $ b_out
 			printStrLn "True"
 
-		is_fall <- fall 0 b_out
+		is_falling <- fall 0 b_out
 
 		atom "b_fall" $ do
-		 	cond $ is_fall
+		 	cond $ is_falling
 		 	printStrLn "FALL !"
-
-		atom "chec_b_false" $ do
+		atom "check_b_false" $ do
 			cond $ Not b_out
 			printStrLn "False"
 
@@ -179,13 +179,13 @@ counter = atom "asynch_counter" $ do
 
 	c <- oscillator 0 False 1 0
 	v0 <- jkFlipFlop 0 (Const True) (Const True) c
-	n_v0 <- atom "f0" $ oneShotFall v0
+	n_v0 <- fall 0 v0 
 
 	v1 <- jkFlipFlop 1 (Const True) (Const True) n_v0
-	n_v1 <- atom "f1" $ oneShotFall v1
+	n_v1 <- fall 1 v1
 
 	v2 <- jkFlipFlop 2 (Const True) (Const True) n_v1
-	n_v2 <- atom "f2" $ oneShotFall v2
+	n_v2 <- fall 2 v2
 
 	v3 <- jkFlipFlop 3 (Const True) (Const True) n_v2
 
@@ -226,6 +226,6 @@ counter = atom "asynch_counter" $ do
 
 test :: Atom ()
 --test = period 500 $ exactPhase 0 $ atom "test" $ printEach 0 "Hello world !" 1 0
-test = period 1000 $ exactPhase 0 $ atom "test_counter" $ latchTest
+test = period 1000 $ exactPhase 0 $ atom "test_counter" $ counter
 	--v <- counter_
 	--printStrLn ""
