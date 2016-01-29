@@ -113,12 +113,16 @@ latch i init c s = atom (nodeName "latch" i) $ do
 	q <== s
 	return (value q)
 
+-- JK FlipFlop
+
 jkFlipFlop :: Integer -> E Bool -> E Bool -> E Bool -> Atom (E Bool)
 jkFlipFlop i j k c = atom (nodeName "JKFlipFlop" i) $ do
 	cond c
 	q <- bool "q" False
 	q  <== ((not_ (value q)) &&. j) ||. ((not_ k) &&. (value q))
 	return $ value q
+
+-- Return True on falling edge.
 
 fall :: Integer -> E Bool -> Atom (E Bool)
 fall i s = atom (nodeName "is_falling" i) $ do
@@ -127,6 +131,8 @@ fall i s = atom (nodeName "is_falling" i) $ do
 		q <== (value last) &&. (not_ s)
 		last <== s
 		return $ (value q)
+
+-- Return True on raising edge.
 
 rise :: Integer -> E Bool -> Atom (E Bool)
 rise i s = atom (nodeName "is_rising" i) $ do
@@ -174,11 +180,13 @@ printEach i s p ph = atom (nodeName "printEach" i) $ do
 		cond c
 		printStrLn s
 
-counter :: Atom ()
+counter :: Atom (E Word64)
 counter = atom "asynch_counter" $ do
 
 	c <- oscillator 0 False 1 0
-	v0 <- jkFlipFlop 0 (Const True) (Const True) c
+	n_c <- fall 3 c
+
+	v0 <- jkFlipFlop 0 (Const True) (Const True) n_c
 	n_v0 <- fall 0 v0 
 
 	v1 <- jkFlipFlop 1 (Const True) (Const True) n_v0
@@ -187,45 +195,12 @@ counter = atom "asynch_counter" $ do
 	v2 <- jkFlipFlop 2 (Const True) (Const True) n_v1
 	n_v2 <- fall 2 v2
 
-	v3 <- jkFlipFlop 3 (Const True) (Const True) n_v2
-
-	--return $ (foldl (.|.) [(value v0) (.<<.) 3, (value v1) (.<<.) 2, (value v2) (.<<.) 1, value v3])
-	atom "v0" $ do
-		cond $ v0
-		printStrLn "0: 1"
-
-	atom "nv0" $ do
-		cond $ Not v0
-		printStrLn "0: 0"
-
-	atom "v1" $ do
-		cond $ v1
-		printStrLn "1: 1"
-
-	atom "nv1" $ do
-		cond $ Not v1
-		printStrLn "1: 0"
-
-	atom "v2" $ do
-		cond $ v2
-		printStrLn "2: 1"
-
-	atom "nv2" $ do
-		cond $ Not v2
-		printStrLn "2: 0"
-
-	atom "v3" $ do
-		cond $ v3
-		printStrLn "3: 1"
-
-	atom "nv3" $ do
-		cond $ Not v3
-		printStrLn "3: 0"
-
-	printStrLn "===="
+	return $ (v2 .<<. 3) .|. (v1 .<<. 2) .|. (v0 .<<. 1) .|. c
 
 test :: Atom ()
 --test = period 500 $ exactPhase 0 $ atom "test" $ printEach 0 "Hello world !" 1 0
-test = period 1000 $ exactPhase 0 $ atom "test_counter" $ counter
+test = period 1000 $ exactPhase 0 $ atom "test_counter" $ do
+	w <- counter
+	printStrLn (show w)
 	--v <- counter_
 	--printStrLn ""
