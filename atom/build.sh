@@ -10,7 +10,7 @@ rm ${CSRC_PREFIX}.c ${CSRC_PREFIX}.h
 
 # Compile the Atom program
 
-${GHC} -dynamic main.hs opts.hs StringEmbed.hs
+${GHC} --make main.hs opts.hs StringEmbed.hs
 
 if [ $? -ne 0 ]; then
 	exit 1
