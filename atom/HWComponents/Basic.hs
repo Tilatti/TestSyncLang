@@ -1,5 +1,3 @@
-{-# LANGUAGE QuasiQuotes #-}
-
 module HWComponents.Basic
 (
 	oscillator,

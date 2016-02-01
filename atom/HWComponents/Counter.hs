@@ -25,7 +25,7 @@ asynchCounter i = atom (nodeName "asynch_counter" i) $ do
 	v1 <- jk 1 (Const True) (Const True) (not_ v0)
 	v2 <- jk 2 (Const True) (Const True) (not_ v1)
 
-	return $ (c, v0, v1, v2)
+	return $ (v2, v1, v0, c)
 
 -- Counter implemented with JK FlipFlop (synchronous)
 
@@ -37,4 +37,4 @@ synchCounter i = atom (nodeName "synch_counter" i) $ do
 	v1 <- jk 1 (Const True) (Const True) (not_ c &&. not_ v0)
 	v2 <- jk 2 (Const True) (Const True) (not_ c &&. not_ v0 &&. not_ v1)
 
-	return $ (c, v0, v1, v2)
+	return $ (v2, v1, v0, c)

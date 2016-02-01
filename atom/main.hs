@@ -79,8 +79,6 @@ prePostHeader _ _ _ =
 	( [embedStr| |]
 	, [embedStr| |])
 
-
-
 -- Basic counter
 
 -- counter :: Integer -> Word64 -> V Bool -> Atom (E Word64)
@@ -106,4 +104,5 @@ test = period 1000 $ exactPhase 0 $ atom "test_counter" $ do
 	w <- HWCounter.asynchCounter 0
 	w2 <- HWCounter.synchCounter 0
 	--printBus 0 w
+	HWBus.printBus 0 w
 	HWBus.printBus 1 w2
