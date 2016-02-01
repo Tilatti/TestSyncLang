@@ -10,7 +10,8 @@ rm ${CSRC_PREFIX}.c ${CSRC_PREFIX}.h
 
 # Compile the Atom program
 
-${GHC} --make main.hs opts.hs StringEmbed.hs
+${GHC} --make main.hs opts.hs StringEmbed.hs \
+	HWComponents/Common HWComponents/Bus.hs HWComponents/Basic.hs HWComponents/Latch.hs
 
 if [ $? -ne 0 ]; then
 	exit 1
