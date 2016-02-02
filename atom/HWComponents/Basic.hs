@@ -28,18 +28,18 @@ oscillator i init period phase = atom (nodeName "oscillator" i) $ do
 
 fall :: Integer -> E Bool -> Atom (E Bool)
 fall i s = atom (nodeName "is_falling" i) $ do
-		q <- bool "q" False
-		last <- bool "last" True
-		q <== (value last) &&. (not_ s)
-		last <== s
-		return $ (value q)
+	q <- bool "q" False
+	last <- bool "last" True
+	q <== (value last) &&. (not_ s)
+	last <== s
+	return $ (value q)
 
 -- Return True on raising edge.
 
 rise :: Integer -> E Bool -> Atom (E Bool)
 rise i s = atom (nodeName "is_rising" i) $ do
-		q <- bool "q" False
-		last <- bool "last" False
-		q <== (not_ (value last)) &&. s
-		last <== s
-		return $ (value q)
+	q <- bool "q" False
+	last <- bool "last" False
+	q <== (not_ (value last)) &&. s
+	last <== s
+	return $ (value q)

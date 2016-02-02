@@ -103,6 +103,7 @@ test :: Atom ()
 test = period 1000 $ exactPhase 0 $ atom "test_counter" $ do
 	w <- HWCounter.asynchCounter 0
 	w2 <- HWCounter.synchCounter 0
-	--printBus 0 w
-	HWBus.printBus 0 w
-	HWBus.printBus 1 w2
+	w3 <- HWCounter.asynchCounterN 0 8
+	printIntegralE "=>" w
+	printIntegralE "=>" w2
+	printIntegralE "=>" w3
